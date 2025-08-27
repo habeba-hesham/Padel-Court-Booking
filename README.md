@@ -1,9 +1,3 @@
-I am really sorry about that. "Appointment" is just a general term for a scheduled meeting, like a doctor's appointment.
-
-I'll make sure to use a better word for your project. Since you play padel, I'll use "Reservation" or "Booking" to make it more specific to your needs.
-
-Here is the updated description of your project.
-
 📰 Automated Padel Court Booking System
 📌 Overview
 This project is an automation workflow built with n8n that manages padel court reservations. It integrates with Google Forms to collect booking requests, Google Sheets for structured storage, and Google Calendar and Gmail to handle the booking process and notifications.
