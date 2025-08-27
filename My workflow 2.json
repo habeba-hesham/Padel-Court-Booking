@@ -1,0 +1,335 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8f573bef-9baa-4074-9f71-ba74ab2a9fa6",
+              "name": "Name",
+              "value": "={{ $json.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "cc171601-2f5a-42c7-8dff-0d0655608f7c",
+              "name": "Date",
+              "value": "={{ $json.Date }}",
+              "type": "string"
+            },
+            {
+              "id": "45e7b8f5-8a6d-4da3-ab48-3bc18018026d",
+              "name": "Time",
+              "value": "={{ $json.Time }}",
+              "type": "string"
+            },
+            {
+              "id": "5c133a24-7820-44e5-868b-5fddca6ffade",
+              "name": "Duration",
+              "value": "={{ $json.Duration }}",
+              "type": "number"
+            },
+            {
+              "id": "e6236e07-e120-455b-9674-2db74bd421a4",
+              "name": "start",
+              "value": "={{\n(() => {\n  const pad = n => String(n).padStart(2,'0');\n  const [day, month, year] = $json[\"Date\"].split('/');\n  const [h, m = \"00\", s = \"00\"] = $json[\"Time\"].split(':');\n  // رجّع ISO +03:00 (القاهرة)\n  return `${year}-${pad(month)}-${pad(day)}T${pad(h)}:${pad(m)}:${pad(s)}+03:00`;\n})()\n}}\n",
+              "type": "string"
+            },
+            {
+              "id": "4265d711-781b-4835-a0a0-9cd0bc86d4c4",
+              "name": "end",
+              "value": "={{\n(() => {\n  const pad = n => String(n).padStart(2,'0');\n  const [day, month, year] = $json[\"Date\"].split('/');\n  const [h, m = \"00\", s = \"00\"] = $json[\"Time\"].split(':');\n  const duration = Number($json[\"Duration\"]) || 0; // المدة بالدقايق\n\n  const start = new Date(\n    Number(year),\n    Number(month) - 1,\n    Number(day),\n    Number(h),\n    Number(m),\n    Number(s)\n  );\n\n  const end = new Date(start.getTime() + duration * 60000);\n\n  return `${end.getFullYear()}-${pad(end.getMonth()+1)}-${pad(end.getDate())}T${pad(end.getHours())}:${pad(end.getMinutes())}:${pad(end.getSeconds())}+03:00`;\n})()\n}}\n",
+              "type": "string"
+            },
+            {
+              "id": "e09ec27f-5daa-4c36-939a-a42cfcf0d714",
+              "name": "id",
+              "value": "={{ $json.ID }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        16
+      ],
+      "id": "a7b33a07-6d8d-4441-8ae6-8f66ac38e5d8",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "fromEmail": "habebahesham97@gmail.com",
+        "toEmail": "={{ $('Google Sheets Trigger').item.json.Email }}",
+        "subject": "Padel court",
+        "emailFormat": "text",
+        "text": "=Hello {{ $('Google Sheets Trigger').item.json.Name }}!\n\n✅ Your reservation has been successfully created.\nDate: {{ $('Google Sheets Trigger').item.json.Date }}\n \nTime: {{ $('Google Sheets Trigger').item.json.Time }}\n\nyour code:{{ $('Google Sheets Trigger').item.json.ID }}\n \nYou can view your reservation in the calendar here:   \nhttps://calendar.google.com/calendar/u/0/embed?src=ddb57de2ae47c2a6ed36e4daa0632941b47ea3d66c389c791a18480232b25c50@group.calendar.google.com&ctz=Africa/Cairo\n\nThank you for booking with us!\n\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        848,
+        -128
+      ],
+      "id": "b25b385f-5b35-44e0-9025-39baac7fa2bc",
+      "name": "Send email",
+      "webhookId": "5e94e453-4dfe-4532-9674-264433511cb4",
+      "credentials": {
+        "smtp": {
+          "id": "y7uQCH4jdbMfXruU",
+          "name": "SMTP account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "ddb57de2ae47c2a6ed36e4daa0632941b47ea3d66c389c791a18480232b25c50@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "padel court"
+        },
+        "start": "={{ $('Edit Fields').item.json.start.trim() }}",
+        "end": "={{ $('Edit Fields').item.json.end.trim() }}",
+        "additionalFields": {
+          "summary": "={{ 'code: ' + $('Edit Fields').item.json.id }}",
+          "visibility": "public"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        -240
+      ],
+      "id": "73db4845-5690-40b1-a4d5-bdfd257920b0",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "lZUNTuweQUf924u9",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "ddb57de2ae47c2a6ed36e4daa0632941b47ea3d66c389c791a18480232b25c50@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "padel court"
+        },
+        "timeMin": "={{ $json.start.trim() }}",
+        "timeMax": "={{ $json.end.trim() }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        16
+      ],
+      "id": "f5c1366f-27b4-434b-a1fc-9c8fe0c2ee1f",
+      "name": "Get availability in a calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "lZUNTuweQUf924u9",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fromEmail": "habebahesham97@gmail.com",
+        "toEmail": "={{ $('Google Sheets Trigger').item.json.Email }}",
+        "subject": "Padel court",
+        "emailFormat": "text",
+        "text": "=Hello {{ $('Google Sheets Trigger').item.json.Name }}!\n\n❌Unfortunately, the selected time is already booked.  \nPlease choose another available slot.\n\nYou can view the available and booked slots here and choose the time that suits you: \nhttps://calendar.google.com/calendar/u/0/embed?src=ddb57de2ae47c2a6ed36e4daa0632941b47ea3d66c389c791a18480232b25c50@group.calendar.google.com&ctz=Africa/Cairo\n\nThank you for your understanding!",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        544,
+        288
+      ],
+      "id": "6a623faa-c9af-454b-baca-e9c0a35a52d5",
+      "name": "Send email1",
+      "webhookId": "2adca5a1-2bf5-4eeb-afe7-ba9ca93a0e27",
+      "credentials": {
+        "smtp": {
+          "id": "y7uQCH4jdbMfXruU",
+          "name": "SMTP account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bccc7b9e-e201-4233-8228-2b6f19fc8836",
+              "leftValue": "={{$json.available}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "c2ad4909-cd78-4181-9298-10ac96ede4b3",
+              "leftValue": "={{ new Date($('Google Sheets Trigger').item.json.Date.split('/').reverse().join('-') + 'T' + $('Google Sheets Trigger').item.json.Time) }}",
+              "rightValue": "={{ new Date() }}",
+              "operator": {
+                "type": "dateTime",
+                "operation": "afterOrEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        336,
+        16
+      ],
+      "id": "291732f3-0699-4cd6-ab9a-41b4d9b773b6",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1QaAoV8rz2GprVDk5Z5YSAu8tbLsk3MwaikyfZrNOFc4",
+          "mode": "list",
+          "cachedResultName": "Padel Court Booking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QaAoV8rz2GprVDk5Z5YSAu8tbLsk3MwaikyfZrNOFc4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2058848672,
+          "mode": "list",
+          "cachedResultName": "Form responses 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QaAoV8rz2GprVDk5Z5YSAu8tbLsk3MwaikyfZrNOFc4/edit#gid=2058848672"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        16
+      ],
+      "id": "d008ac3b-16a4-486a-8737-226349da0546",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "LyeM00DUeu68fOOi",
+          "name": "Google Sheets Trigger account 3"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Get availability in a calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get availability in a calendar": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "840fb1f5-6fb3-42be-9e47-00d2a4f37745",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "31aebbf378b9302c2c8d7cc1a423af75ae83fd04fd73270eb8ce8d59656d17c4"
+  },
+  "id": "jIoEi28lCz4yGWI0",
+  "tags": []
+}
